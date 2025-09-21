@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Recommendation System</title>
+  <style>
+    body {
+      background: #0d0d0d;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    header {
+      background: #1a1a1a;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+      margin: 0;
+      color: #ffcc00;
+    }
+
+    #controls {
+      margin: 20px;
+    }
+
+    input, select, button {
+      padding: 10px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    input {
+      width: 220px;
+    }
+
+    button {
+      background: #ffcc00;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #ffaa00;
+    }
+
+    #movies {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 20px;
+    }
+
+    .movie {
+      background: #1a1a1a;
+      margin: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      width: 200px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .movie:hover {
+      transform: scale(1.05);
+    }
+
+    .movie img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    .movie h3 {
+      margin: 10px 0 5px;
+      font-size: 16px;
+      color: #ffcc00;
+    }
+
+    .movie p {
+      margin: 0;
+      font-size: 14px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎬 Movie Recommendation System</h1>
+  </header>
+
+  <div id="controls">
+    <!-- Search -->
+    <input type="text" id="search" placeholder="Search for a movie...">
+    <button onclick="searchMovie()">Search</button>
+
+    <br><br>
+
+    <!-- Genre -->
+    <label for="genre">Genre:</label>
+    <select id="genre" onchange="filterMovies()">
+      <option value="">--Select--</option>
+      <option value="28">Action</option>
+      <option value="35">Comedy</option>
+      <option value="18">Drama</option>
+      <option value="27">Horror</option>
+      <option value="10749">Romance</option>
+      <option value="16">Animation</option>
+    </select>
+
+    <!-- Age Rating -->
+    <label for="age">Age Rating:</label>
+    <select id="age" onchange="filterMovies()">
+      <option value="">--Select--</option>
+      <option value="U">Universal (U)</option>
+      <option value="UA">Parental Guidance (UA)</option>
+      <option value="A">Adult (A)</option>
+    </select>
+
+    <!-- Language -->
+    <label for="lang">Language:</label>
+    <select id="lang" onchange="filterMovies()">
+      <option value="">--Select--</option>
+      <option value="en">English</option>
+      <option value="hi">Hindi</option>
+      <option value="mr">Marathi</option>
+      <option value="te">Telugu</option>
+      <option value="ta">Tamil</option>
+      <option value="ml">Malayalam</option>
+      <option value="kn">Kannada</option>
+      <option value="bn">Bengali</option>
+      <option value="gu">Gujarati</option>
+      <option value="pa">Punjabi</option>
+    </select>
+
+    <!-- Sort -->
+    <label for="sort">Sort By:</label>
+    <select id="sort" onchange="filterMovies()">
+      <option value="">--Select--</option>
+      <option value="popularity.desc">Popularity</option>
+      <option value="vote_average.desc">Top Rated</option>
+    </select>
+  </div>
+
+  <div id="movies"></div>
+
+  <script>
+    const apiKey = "3bc8b1087849031c77b766f590c71238"; // 🔑 replace with your TMDb API key
+
+    // Search by movie name
+    async function searchMovie() {
+      const query = document.getElementById("search").value;
+      if (!query) {
+        alert("Please enter a movie name!");
+        return;
+      }
+
+      const url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${query}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      displayMovies(data.results);
+    }
+
+    // Filter by dropdowns
+    async function filterMovies() {
+      const genre = document.getElementById("genre").value;
+      const age = document.getElementById("age").value;
+      const lang = document.getElementById("lang").value;
+      const sort = document.getElementById("sort").value;
+
+      let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}`;
+
+      if (genre) url += `&with_genres=${genre}`;
+      if (age) url += `&certification_country=IN&certification=${age}`;
+      if (lang) url += `&with_original_language=${lang}`;
+      if (sort) url += `&sort_by=${sort}`;
+
+      const response = await fetch(url);
+      const data = await response.json();
+      displayMovies(data.results);
+    }
+
+    // Display movies
+    function displayMovies(movies) {
+      if (!movies || movies.length === 0) {
+        document.getElementById("movies").innerHTML = "<p>No movies found.</p>";
+        return;
+      }
+
+      document.getElementById("movies").innerHTML = movies.map(m => `
+        <div class="movie">
+          <img src="https://image.tmdb.org/t/p/w200${m.poster_path}" alt="${m.title}">
+          <h3>${m.title}</h3>
+          <p>⭐ ${m.vote_average}</p>
+          <p>${m.release_date}</p>
+        </div>
+      `).join("");
+    }
+  </script>
+</body>
+</html>
+
